@@ -1,0 +1,288 @@
+name: Expense Planner - Gemma 26B
+version: 1.0.0
+schema: v1
+
+models:
+  - name: Gemma 4 26B - Expense Planner
+    provider: ollama
+    model: gemma4:26b
+    roles:
+      - chat
+      - edit
+      - apply
+    defaultCompletionOptions:
+      contextLength: 32768
+      temperature: 0.2
+      keepAlive: 1800
+  - name: Llama 3.1 8B
+    provider: ollama
+    model: llama3.1:8b
+    roles:
+      - chat
+      - edit
+      - apply
+  - name: Qwen2.5-Coder 1.5B
+    provider: ollama
+    model: qwen2.5-coder:1.5b-base
+    roles:
+      - autocomplete
+  - name: Nomic Embed
+    provider: ollama
+    model: nomic-embed-text:latest
+    roles:
+      - embed
+  - name: DeepSeek Coder
+    provider: ollama
+    model: deepseek-coder-v2:16b
+  - name: Autodetect
+    provider: ollama
+    model: AUTODETECT
+autocomplete:
+  name: Autocomplete
+  provider: ollama
+  model: qwen2.5-coder:7b
+
+rules:
+  - |
+    You are the primary coding assistant for the Expense Planner project.
+
+    PROJECT
+    - React + Vite application
+    - Supabase backend/authentication
+    - Deployed to Vercel
+    - Local development on Windows
+    - Repository: E:\expense-planner-web
+
+    IMPORTANT WORKFLOW
+    - Read AI_CONTEXT.md in the project root before making changes.
+    - Inspect existing code before editing.
+    - Search for relevant usages before changing shared functionality.
+    - Never assume how a function or component works without reading it.
+    - Make minimal, targeted changes.
+    - Do not rewrite unrelated code.
+    - Do not remove working functionality.
+    - Preserve authentication and Supabase functionality.
+    - Preserve existing UI behavior unless the task requires a UI change.
+    - After editing, check for syntax errors, duplicate declarations, duplicate exports, broken imports and undefined variables.
+    - When practical, run the relevant development/build command and inspect the result.
+    - Clearly report what changed, what was tested, and remaining issues.
+
+    MULTI-CURRENCY ARCHITECTURE
+
+    Every monetary record stores:
+    - amount
+    - currency
+
+    This applies to:
+    - expenses
+    - income
+    - savings
+    - budgets
+    - monthly budgets
+    - other monetary records
+
+    SOURCE OF TRUTH
+
+    The original amount and original currency stored in the database are always the source of truth.
+
+    Never replace an original value with a converted value.
+
+    Example:
+    100 USD remains 100 USD.
+    2654 MKD remains 2654 MKD.
+
+    GLOBAL CURRENCY
+
+    The selected global currency is used only for:
+    - totals
+    - calculations
+    - dashboard cards
+    - monthly summaries
+    - balance
+    - income totals
+    - expense totals
+    - budget calculations
+    - remaining budget
+    - statistics
+    - charts
+    - reports
+
+    Each original monetary value must be converted to the current global currency before aggregation.
+
+    Never convert a previously converted value.
+
+    Always use:
+    original amount + original currency -> target currency
+
+    Never use:
+    already converted amount -> another conversion
+
+    This prevents:
+    - double conversion
+    - cumulative rounding errors
+    - multiplied totals
+    - incorrect currency switching
+
+    TRANSACTION DISPLAY
+
+    Individual transaction rows display their original:
+    - amount
+    - currency
+
+    Changing global currency must not change stored transaction values.
+
+    ENTRY FORMS
+
+    Every monetary entry form must have its own currency selector.
+
+    The selector:
+    - defaults to the current global currency
+    - can be changed independently
+    - saves the entered amount exactly as entered
+    - saves the selected currency
+    - does not convert the amount before saving
+
+    CURRENCY SWITCHING
+
+    Changing global currency must:
+    - update the selected global currency
+    - recalculate aggregated values
+    - refresh charts
+    - refresh dashboard totals
+    - refresh budget calculations
+    - refresh statistics
+
+    It must NOT:
+    - update stored transaction amounts
+    - update stored transaction currencies
+    - permanently convert database records
+
+    Never reintroduce convertAllEntries().
+
+    Permanent conversion of transaction records is incorrect.
+
+    RACE CONDITIONS
+
+    Only one global currency change should run at a time.
+
+    Prevent:
+    - simultaneous currency changes
+    - duplicate calculations
+    - multiplied totals
+    - stale currency state
+
+    SAVINGS
+
+    Savings entries remain in their original currencies.
+
+    Group savings by original currency.
+
+    Example:
+
+    USD
+    500 USD
+
+    MKD
+    25,000 MKD
+
+    EUR
+    150 EUR
+
+    Also show Global Total Savings converted into the selected global currency.
+
+    Changing global currency changes only the global total.
+
+    Individual savings entries remain unchanged.
+
+    BUDGETS
+
+    Budget calculations must correctly handle different currencies.
+
+    Convert values to the global currency before calculating:
+    - spent
+    - remaining
+    - percentage used
+    - category totals
+    - budget charts
+    - donut charts
+
+    DATABASE
+
+    All monetary database records must preserve their currency.
+
+    SELECT / INSERT / UPDATE operations must include currency wherever required.
+
+    Before modifying database queries:
+    - inspect the schema
+    - inspect existing callers
+    - preserve existing data
+
+    Never destroy unrelated fields.
+
+    If a migration is required:
+    - preserve existing records
+    - use a sensible default based on the application's previous currency
+    - explain the migration required
+
+    IMPORTANT FILES
+
+    Frequently relevant files:
+    - src/db.js
+    - src/currency.js
+    - src/useCurrency.js
+    - src/screens/LedgerScreen.jsx
+    - src/screens/SavingsScreen.jsx
+    - src/screens/HistoryScreen.jsx
+    - src/components/BudgetDonut.jsx
+
+    Do not assume these are the only relevant files.
+
+    Search the project.
+
+    LEGACY CODE
+
+    Search for:
+    - convertAllEntries
+    - permanent database currency conversion
+    - hardcoded USD assumptions
+    - old conversion helpers
+    - conversion of already-converted values
+    - totals calculated without conversion
+
+    Do not blindly replace occurrences.
+
+    Inspect each occurrence first.
+
+    TESTING
+
+    When modifying currency functionality, verify:
+    - single-currency transactions
+    - mixed currencies
+    - entries using a currency different from global currency
+    - global currency switching
+    - repeated currency switching
+    - multi-currency savings
+    - multi-currency budgets
+    - charts after switching currency
+    - no duplicated or multiplied totals
+    - original transaction amounts remain unchanged
+    - authentication still works
+    - no console errors
+    - no Vite/build errors
+
+    RESPONSE FORMAT
+
+    At the end of a coding task report:
+    1. Files inspected
+    2. Changes made
+    3. Bugs found and fixed
+    4. Tests/checks performed
+    5. Remaining issues or manual tests needed
+
+    IMPORTANT
+
+    Do not ask unnecessary clarification questions.
+
+    Inspect the repository and make the best reasonable implementation.
+
+    Preserve existing architecture unless inspection proves it is incorrect.
