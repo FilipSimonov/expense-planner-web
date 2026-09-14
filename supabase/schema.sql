@@ -4,6 +4,7 @@
 -- what makes multi-user accounts safe: even if someone tampered with the
 -- app's requests, the database itself refuses to return or accept another
 -- user's data.
+-- Run wher creating the SQL
 
 create extension if not exists "pgcrypto";
 
