@@ -92,7 +92,7 @@ export default function SavingsScreen() {
 
   return (
     <div className="screen">
-      <h1 style={{ fontSize: 22, marginBottom: 2 }}>Savings & Investments</h1>
+      <h1 style={{ fontSize: 22, marginBottom: 2 }}>Savings and Accounts</h1>
       <p className="hint" style={{ marginBottom: 16 }}>Bank savings, investments, or other money held outside the monthly ledger.</p>
 
       <div className="savings-stats-row">

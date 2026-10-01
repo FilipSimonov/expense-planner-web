@@ -5,6 +5,7 @@ export default function AuthScreen() {
   const [mode, setMode] = useState('login'); // 'login' | 'signup' | 'forgot'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [birthday, setBirthday] = useState('');
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
   const [busy, setBusy] = useState(false);
@@ -15,6 +16,26 @@ export default function AuthScreen() {
     setInfo('');
     if (!email.trim()) { setError('Enter your email'); return; }
     if (mode !== 'forgot' && !password) { setError('Enter your password'); return; }
+    if (mode === 'signup' && !birthday) { setError('Enter your birthday'); return; }
+
+    // Age validation
+    if (mode === 'signup' && birthday) {
+      const birthDate = new Date(birthday);
+      if (isNaN(birthDate.getTime())) {
+        setError('Please enter a valid birthday');
+        return;
+      }
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      if (age < 14) {
+        setError('You must be at least 14 years old to join.');
+        return;
+      }
+    }
 
     setBusy(true);
     try {
@@ -25,7 +46,10 @@ export default function AuthScreen() {
         const { error: err } = await supabase.auth.signUp({
           email: email.trim(),
           password,
-          options: { emailRedirectTo: `${window.location.origin}/welcome` },
+          options: {
+            emailRedirectTo: `${window.location.origin}/welcome`,
+            data: { birthday }
+          },
         });
         if (err) throw err;
         setInfo('Check your email to confirm your account, then log in.');
@@ -58,6 +82,12 @@ export default function AuthScreen() {
             <label htmlFor="email">Email</label>
             <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
           </div>
+          {mode === 'signup' && (
+            <div className="auth-field">
+              <label htmlFor="birthday">Birthday</label>
+              <input id="birthday" type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} />
+            </div>
+          )}
           {mode !== 'forgot' && (
             <div className="auth-field">
               <label htmlFor="password">Password</label>
@@ -93,3 +123,4 @@ export default function AuthScreen() {
     </div>
   );
 }
+

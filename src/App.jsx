@@ -7,6 +7,7 @@ import ResetPasswordScreen from './screens/ResetPasswordScreen';
 import LedgerScreen from './screens/LedgerScreen';
 import HistoryScreen from './screens/HistoryScreen';
 import SavingsScreen from './screens/SavingsScreen';
+import SettingsScreen from './screens/SettingsScreen';
 import { getLastThreeMonths } from './db';
 
 export default function App() {
@@ -111,6 +112,7 @@ export default function App() {
       {tab === 'ledger' && <LedgerScreen selectedMonth={selectedMonth} onMonthClosed={handleMonthClosed} />}
       {tab === 'history' && <HistoryScreen selectedMonth={selectedMonth} onReopenMonth={handleReopenMonth} />}
       {tab === 'savings' && <SavingsScreen selectedMonth={selectedMonth} />}
+      {tab === 'settings' && <SettingsScreen />}
 
       <nav className="tab-bar">
         <button className={`tab-btn ${tab === 'ledger' ? 'active' : ''}`} onClick={() => setTab('ledger')}>
@@ -120,7 +122,10 @@ export default function App() {
           <span className="tab-icon">◷</span>History
         </button>
         <button className={`tab-btn ${tab === 'savings' ? 'active' : ''}`} onClick={() => setTab('savings')}>
-          <span className="tab-icon">◈</span>Savings
+          <span className="tab-icon">◈</span>Savings and Accounts
+        </button>
+        <button className={`tab-btn ${tab === 'settings' ? 'active' : ''}`} onClick={() => setTab('settings')}>
+          <span className="tab-icon">⚙</span>Settings
         </button>
       </nav>
     </div >
